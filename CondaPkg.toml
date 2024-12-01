@@ -1,0 +1,6 @@
+[deps]
+pandas = ""
+
+[pip.deps.justetf-scraping]
+extras = ["all"]
+version = "@git+https://github.com/druzsan/justetf-scraping.git"
