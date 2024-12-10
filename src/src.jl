@@ -1,6 +1,6 @@
 mkpath("data")
 
-function up_to_date_charts(DO)
+function up_to_date_charts(DO, loc="data/charts.csv")
     mkpath("data")
 
     DC=DataFrame(:date=>findmin(DO.inception_date)[1]:Day(1):Dates.today());
@@ -20,7 +20,11 @@ function up_to_date_charts(DO)
             pad_below=Dates.value(dates[1]-first_day)
             pad_above=Dates.value(last_day-dates[end])
 
-            insertcols!(DC,tk=>cat(fill(missing,pad_below),vals,fill(missing,pad_above); dims=1))
+            if pad_below>=0
+                insertcols!(DC,tk=>cat(fill(missing,pad_below),vals,fill(missing,pad_above); dims=1))
+            else
+                insertcols!(DC,tk=>cat(vals[1-pad_below:end],fill(missing,pad_above); dims=1))
+            end
             
             println("$tk is loaded $i/$(size(DO,1))")
             i+=1
@@ -35,11 +39,10 @@ function up_to_date_charts(DO)
         end
     end
 
-    CSV.write("data/charts.csv",DC)
+    CSV.write(loc,DC)
 
     return DC
 end
-
 function dist_name(nm::String)
     rules=(r"\(Acc\)$" => "(Dist)",r"\(acc\)$" => "(dist)", r"Acc$" => "Dist",  r"acc$" => "dist", r"A-acc$" => "A-dis", r"ETF$" => "ETF Distribution", r"ETF$" => "ETF Dist", r"Accumulating$"=>"Distributing", r"1C&"=>"1D")
     replace(nm, rules...)
